@@ -1,0 +1,3 @@
+- "esp32-pager": 
+    title: "ESP32 Pager"
+    description: "A pager using an ESP32-S3 and a node.js backend."
