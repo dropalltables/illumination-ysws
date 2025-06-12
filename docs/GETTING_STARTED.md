@@ -11,4 +11,4 @@ So, you wanna do Illumination, heres how get started in 5 Easy Steps™.
 
 3. **Get a shovel**, after doing both steps, go look at how to [submit](/docs/SUBMIT.md), and follow the pre-submission steps there.
 
-4. **Start digging**, make sure you have followed step 3 thoroughly. After doing that, see [this presentation](https://docs.google.com/presentation/d/e/2PACX-1vTb7lteO1mcMLg6FjuQIOa8-3fBaly3BfqTqTcUgl8XXOedUktOt_cHmkgv8I7L14bs1DHTXLcBea1n/pub) for how to do this. It is the single *best* resource to follow for your project, and should used as the source of truth for most things.
+4. **Start digging**, make sure you have followed step 3 thoroughly. After doing that, see [this presentation](https://docs.google.com/presentation/d/e/2PACX-1vTb7lteO1mcMLg6FjuQIOa8-3fBaly3BfqTqTcUgl8XXOedUktOt_cHmkgv8I7L14bs1DHTXLcBea1n/pub) for how to do this. It is the single *best* resource to follow for your project, and should used as the source of truth for most things. **TO QUALIFY FOR THIS YSWS YOU NEED TO INSTALL HACKATIME, PLEASE FOLLOW THE INSTRUCTIONS AT https://hackatime.hackclub.com**

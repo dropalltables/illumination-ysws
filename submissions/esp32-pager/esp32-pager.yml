@@ -1,0 +1,10 @@
+title: "ESP32 Pager"
+description: "A pager using an ESP32-S3 and a node.js backend."
+gallery: "showcase.png"
+bom: "bom.csv"
+time: "20.2h"
+demo: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+tags:
+  - "nodejs"
+  - "arduino"
+  - "notifications"
