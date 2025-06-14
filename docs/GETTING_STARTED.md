@@ -7,7 +7,7 @@ So, you wanna do Illumination, heres how get started in 5 Easy Steps™.
 - [x] uses a backend to send messages and recieve read updates
 - [x] uses a website to send messages and view updates on those messages.
 
-2. **Pick your poision**, you need to plan out your project, choose what you want to focus on, either hardware, or software, you are allocated by default $20 for parts, and $10 for cloud credits, $10 are left for advanced projects, if your project is advanced enough, you will get to **choose** between either more parts, or more credits.
+2. **Pick your poision**, you need to plan out your project, choose what you want to focus on, either hardware, or software, you are allocated by default $20 for parts, and $10 for cloud credits, $10 are left for advanced projects, if your project is advanced enough, you will get to **choose** between either more parts, or more credits. If you do not need extra parts, do not select extra parts, this can cause your project to be rejected.
 
 3. **Get a shovel**, after doing both steps, go look at how to [submit](/docs/SUBMIT.md), and follow the pre-submission steps there.
 

@@ -14,6 +14,7 @@
   - [ ] Added project tags to `folder-name.yml`
   - [ ] My folder title is alphaneumeric and fits the requirements
 - [ ] If outside the US I've checked that I can afford the customs charges in my country (which isn't covered by Illumination)
+- [ ] I need extra parts and I have included a BOM
 ___
 - [ ] *(Optional)* This project is advanced[^1].
   - [ ] I am applying for the extra grant money[^2].

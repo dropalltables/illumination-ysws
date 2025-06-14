@@ -36,7 +36,7 @@
 title: "Project title"
 description: "A short one sentence description of your project. "
 gallery: "The name of your website's showcase PNG. (Probably showcase.png)"
-bom: "The name of your CSV BOM file. (Probably bom.csv)"
+bom: "The name of your CSV BOM file. (Probably bom.csv), if none put NA."
 time: "Time in hours (e.g. 20.2h) you spent on this YSWS (be honest, less than 20 hours might be accepted if your project is high effort)."
 demo: "Unlisted YouTube demo of your website, backend, and prototype if applicable."
 advanced: "true/false":
@@ -49,7 +49,7 @@ tags:
   - "notifications"
   - "nodejs"
 ```
-6. Make your BOM, after figuring out what parts you need for your project, find THS parts on digikey, and get the part numbers and quanity you need for them:
+6. *Optional* Make your BOM, after figuring out what parts you need for your project, find THS parts on digikey, and get the part numbers and quanity you need for them:
 ```csv
 Digikey Part Number,Quantity
 732-5008-ND,2
