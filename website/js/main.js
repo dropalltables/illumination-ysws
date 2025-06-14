@@ -41,9 +41,3 @@ document.addEventListener('keydown', function(e) {
     alert("🍌 You found a banana! 🍌");
   }
 });
-
-// Show the current date
-const footer = document.querySelector('footer p');
-const today = new Date();
-const date = today.toLocaleDateString();
-footer.innerHTML += ' | Today is: ' + date;
