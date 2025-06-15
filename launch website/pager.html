@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pager Demo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+    #websocket-messages, #eventLog {
+      border: 1px solid #ccc;
+      height: 300px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    .tab-content {
+      display: none;
+      padding: 10px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    button:disabled {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pager Demo</h1>
+  <h2>THIS WEBSITE LOGS AND STORES IPs, AND SHOWS THEM PUBLICLY</h2>
+  <p><strong>!!! PLEASE READ !!!</strong> There is an actual hardware "pager" that I made, since I can't give you guys that (I don't have enough sorry) but I can give you a "simulated" client! This is a reciever, and sender for my pager. The actual WebUI only has a website sender, but this one has a receiver so that you can see what the pager sees.</p>
+  <div>
+    <button onclick="showTab('sender')">Sender Mode</button>
+    <button onclick="showTab('receiver')">Receiver Mode</button>
+  </div>
+  
+  <div>
+    <!-- Sender Mode -->
+    <div id="sender" class="tab-content active">
+      <h2>Send a Message to ESP32</h2>
+      <form id="messageForm">
+        <div>
+          <label for="message">Message:</label>
+          <input type="text" id="message" name="message" required>
+        </div>
+        <div>
+          <label for="authToken">Auth Token:</label>
+          <input type="text" id="authToken" name="authToken" required>
+        </div>
+        <button type="submit">Send</button>
+      </form>
+
+      <h2>WebSocket Connection</h2>
+      <div>
+        <button id="authenticateButton">Authenticate WebSocket Connection</button>
+        <div id="connection-status">WebSocket Status: Disconnected</div>
+        <div id="authentication-status">Authentication Status: Not Authenticated</div>
+      </div>
+
+      <h3>WebSocket Stream</h3>
+      <div id="websocket-messages">
+        <ul id="messages-list"></ul>
+      </div>
+    </div>
+    
+    <!-- Receiver Mode -->
+    <div id="receiver" class="tab-content">
+      <h2>Connection</h2>
+      <div>
+        <label for="apiKey">API Key:</label>
+        <input type="password" id="apiKey">
+        <button id="connectBtn">Connect</button>
+        <div id="connectionStatus">Not connected</div>
+      </div>
+
+      <h2>Pager Message</h2>
+      <div id="currentMessage">No message available</div>
+      <div id="messageStatus"></div>
+      <button id="checkBtn" disabled>Check for Messages</button>
+      <button id="readBtn" disabled>Mark as Read</button>
+
+      <h2>WebSocket Events</h2>
+      <pre id="eventLog"></pre>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    /******** SENDER MODE CODE ********/
+    
+    // Form submission functionality
+    document.getElementById('messageForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const message = document.getElementById('message').value;
+      const authToken = document.getElementById('authToken').value;
+
+      try {
+        const response = await fetch('https://api.viruus.zip/pager/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken
+          },
+          body: JSON.stringify({ message })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          alert(`Success: ${data.message}`);
+        } else {
+          alert('Failed to send message. Check your auth token.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while sending the message');
+      }
+    });
+
+    // WebSocket variables - Sender
+    let socket = null;
+    let isAuthenticated = false;
+    const authStatusElement = document.getElementById('authentication-status');
+
+    // WebSocket connection - Sender
+    const connectWebSocket = () => {
+      const statusElement = document.getElementById('connection-status');
+      const messagesList = document.getElementById('messages-list');
+      
+      // Update WebSocket URL to use the specific /pager/ws endpoint
+      socket = new WebSocket('wss://api.viruus.zip/pager/ws');
+      
+      socket.onopen = () => {
+        statusElement.textContent = 'WebSocket Status: Connected';
+        statusElement.style.color = 'green';
+        
+        // Add a connection established message
+        const connectionItem = document.createElement('li');
+        connectionItem.textContent = `${new Date().toLocaleTimeString()} - Connection established`;
+        messagesList.appendChild(connectionItem);
+      };
+      
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          const messageItem = document.createElement('li');
+          
+          // Handle authentication response
+          if (data.type === "auth") {
+            if (data.status === "success") {
+              isAuthenticated = true;
+              authStatusElement.textContent = "Authentication Status: Authenticated";
+              authStatusElement.style.color = "green";
+              messageItem.textContent = `${new Date().toLocaleTimeString()} - WebSocket authenticated successfully`;
+            } else {
+              isAuthenticated = false;
+              authStatusElement.textContent = "Authentication Status: Authentication Failed";
+              authStatusElement.style.color = "red";
+              messageItem.textContent = `${new Date().toLocaleTimeString()} - WebSocket authentication failed`;
+            }
+          } 
+          // Format event messages
+          else if (data.timestamp && data.event) {
+            // Include IP address information if available
+            const ipInfo = data.clientIP ? ` | IP: ${data.clientIP}` : '';
+            messageItem.textContent = `${new Date(data.timestamp).toLocaleTimeString()} - ${data.event}${ipInfo}`;
+          } else {
+            messageItem.textContent = `${new Date().toLocaleTimeString()} - ${JSON.stringify(data)}`;
+          }
+          
+          messagesList.appendChild(messageItem);
+          
+          // Auto-scroll to the bottom
+          const container = document.getElementById('websocket-messages');
+          container.scrollTop = container.scrollHeight;
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+          
+          // Handle plain text messages
+          const messageItem = document.createElement('li');
+          messageItem.textContent = `${new Date().toLocaleTimeString()} - ${event.data}`;
+          messagesList.appendChild(messageItem);
+        }
+      };
+      
+      socket.onclose = () => {
+        statusElement.textContent = 'WebSocket Status: Disconnected';
+        statusElement.style.color = 'red';
+        
+        // Reset authentication status
+        isAuthenticated = false;
+        authStatusElement.textContent = "Authentication Status: Not Authenticated";
+        authStatusElement.style.color = "inherit";
+        
+        // Add a disconnection message
+        const disconnectionItem = document.createElement('li');
+        disconnectionItem.textContent = `${new Date().toLocaleTimeString()} - Connection closed`;
+        messagesList.appendChild(disconnectionItem);
+        
+        // Attempt to reconnect after a delay
+        setTimeout(() => {
+          const reconnectingItem = document.createElement('li');
+          reconnectingItem.textContent = `${new Date().toLocaleTimeString()} - Attempting to reconnect...`;
+          messagesList.appendChild(reconnectingItem);
+          connectWebSocket();
+        }, 5000);
+      };
+      
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        statusElement.textContent = 'WebSocket Status: Error';
+        statusElement.style.color = 'red';
+        
+        // Add an error message
+        const errorItem = document.createElement('li');
+        errorItem.textContent = `${new Date().toLocaleTimeString()} - Connection error`;
+        messagesList.appendChild(errorItem);
+      };
+    };
+
+    // Authentication button handler - Sender
+    document.getElementById('authenticateButton').addEventListener('click', () => {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        alert('WebSocket is not connected. Please wait for the connection to establish.');
+        return;
+      }
+
+      const authKey = prompt('Enter authentication key to access server logs:');
+      
+      if (authKey) {
+        // Send authentication message
+        socket.send(JSON.stringify({
+          type: 'auth',
+          key: authKey
+        }));
+      }
+    });
+
+    // Initialize WebSocket connection when the page loads
+    document.addEventListener('DOMContentLoaded', connectWebSocket);
+    
+    /******** RECEIVER MODE CODE ********/
+    
+    // DOM Elements - Receiver
+    const apiKeyInput = document.getElementById('apiKey');
+    const connectBtn = document.getElementById('connectBtn');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const currentMessage = document.getElementById('currentMessage');
+    const messageStatus = document.getElementById('messageStatus');
+    const checkBtn = document.getElementById('checkBtn');
+    const readBtn = document.getElementById('readBtn');
+    const eventLog = document.getElementById('eventLog');
+
+    // Client state - Receiver
+    let clientState = {
+      connected: false,
+      apiKey: '',
+      hasNewMessage: false,
+      currentMessage: '',
+      socket: null
+    };
+
+    // Log events - Receiver
+    function logEvent(message, isWebSocket = false) {
+      const timestamp = new Date().toLocaleTimeString();
+      eventLog.textContent += `[${timestamp}] ${isWebSocket ? '[WS] ' : ''}${message}\n`;
+      eventLog.scrollTop = eventLog.scrollHeight;
+    }
+
+    // Connect to pager service - Receiver
+    async function connectToPager() {
+      const apiKey = apiKeyInput.value.trim();
+      
+      if (!apiKey) {
+        alert('Please enter an API key');
+        return;
+      }
+      
+      connectionStatus.textContent = 'Connecting...';
+      
+      try {
+        const response = await fetch('https://api.viruus.zip/pager/messages', {
+          method: 'GET',
+          headers: {
+            'Authorization': apiKey
+          }
+        });
+        
+        if (response.ok) {
+          clientState.currentMessage = await response.text();
+          clientState.connected = true;
+          clientState.apiKey = apiKey;
+          clientState.hasNewMessage = true;
+          
+          // Connect WebSocket
+          connectReceiverWebSocket();
+          
+          // Update UI
+          connectionStatus.textContent = 'Connected';
+          connectBtn.textContent = 'Disconnect';
+          checkBtn.disabled = false;
+          readBtn.disabled = false;
+          
+          currentMessage.textContent = clientState.currentMessage;
+          messageStatus.textContent = 'New message!';
+          
+          logEvent('Connected to pager service');
+        } else {
+          connectionStatus.textContent = 'Connection failed: ' + (await response.text());
+          logEvent('Connection failed');
+        }
+      } catch (error) {
+        connectionStatus.textContent = 'Connection error: ' + error.message;
+        logEvent('Connection error: ' + error.message);
+      }
+    }
+
+    // Disconnect from pager service - Receiver
+    function disconnectFromPager() {
+      if (clientState.socket && clientState.socket.readyState === WebSocket.OPEN) {
+        clientState.socket.close();
+      }
+      
+      clientState = {
+        connected: false,
+        apiKey: '',
+        hasNewMessage: false,
+        currentMessage: '',
+        socket: null
+      };
+      
+      connectionStatus.textContent = 'Disconnected';
+      connectBtn.textContent = 'Connect';
+      checkBtn.disabled = true;
+      readBtn.disabled = true;
+      currentMessage.textContent = 'No message available';
+      messageStatus.textContent = '';
+      
+      logEvent('Disconnected from pager service');
+    }
+
+    // Check for new messages - Receiver
+    async function checkForMessages() {
+      if (!clientState.connected) {
+        alert('Please connect first');
+        return;
+      }
+      
+      messageStatus.textContent = 'Checking for messages...';
+      
+      try {
+        const response = await fetch('https://api.viruus.zip/pager/messages', {
+          method: 'GET',
+          headers: {
+            'Authorization': clientState.apiKey
+          }
+        });
+        
+        if (response.ok) {
+          const newMessage = await response.text();
+          const hasChanged = clientState.currentMessage !== newMessage;
+          
+          if (hasChanged) {
+            clientState.currentMessage = newMessage;
+            clientState.hasNewMessage = true;
+            currentMessage.textContent = newMessage;
+            messageStatus.textContent = 'New message received!';
+            logEvent('New message received');
+          } else {
+            messageStatus.textContent = 'No new messages';
+            logEvent('No new messages');
+          }
+        } else {
+          messageStatus.textContent = 'Failed to check messages: ' + (await response.text());
+          logEvent('Failed to check messages');
+        }
+      } catch (error) {
+        messageStatus.textContent = 'Error checking messages: ' + error.message;
+        logEvent('Error checking messages: ' + error.message);
+      }
+    }
+
+    // Mark message as read - Receiver
+    async function markAsRead() {
+      if (!clientState.connected || !clientState.hasNewMessage) {
+        return;
+      }
+      
+      messageStatus.textContent = 'Marking message as read...';
+      
+      try {
+        const response = await fetch('https://api.viruus.zip/pager/read', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': clientState.apiKey
+          },
+          body: JSON.stringify({})
+        });
+        
+        if (response.ok) {
+          clientState.hasNewMessage = false;
+          messageStatus.textContent = 'Message marked as read';
+          logEvent('Message marked as read');
+        } else {
+          messageStatus.textContent = 'Failed to mark message as read';
+          logEvent('Failed to mark message as read');
+        }
+      } catch (error) {
+        messageStatus.textContent = 'Error marking message as read: ' + error.message;
+        logEvent('Error marking message as read: ' + error.message);
+      }
+    }
+
+    // Connect to WebSocket server - Receiver
+    function connectReceiverWebSocket() {
+      clientState.socket = new WebSocket('wss://api.viruus.zip/pager/ws');
+      
+      clientState.socket.onopen = () => {
+        logEvent('WebSocket connection established', true);
+        
+        if (clientState.apiKey) {
+          clientState.socket.send(JSON.stringify({
+            type: 'auth',
+            key: clientState.apiKey
+          }));
+          logEvent('Sent authentication request', true);
+        }
+      };
+      
+      clientState.socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.type === 'auth') {
+            if (data.status === 'success') {
+              logEvent('WebSocket authenticated successfully', true);
+            } else {
+              logEvent('WebSocket authentication failed', true);
+            }
+          }
+          else if (data.event) {
+            logEvent(`Event: ${data.event}${data.clientIP ? ' | IP: ' + data.clientIP : ''}`, true);
+            
+            if (data.event === 'Message updated') {
+              checkForMessages();
+            }
+          } 
+          else {
+            logEvent('Received: ' + JSON.stringify(data), true);
+          }
+        } catch (error) {
+          logEvent('Received: ' + event.data, true);
+        }
+      };
+      
+      clientState.socket.onclose = () => {
+        logEvent('WebSocket connection closed', true);
+        
+        if (clientState.connected) {
+          logEvent('Attempting to reconnect WebSocket in 5 seconds...', true);
+          setTimeout(connectReceiverWebSocket, 5000);
+        }
+      };
+      
+      clientState.socket.onerror = () => {
+        logEvent('WebSocket error', true);
+      };
+    }
+
+    // Event listeners - Receiver
+    connectBtn.addEventListener('click', () => {
+      if (clientState.connected) {
+        disconnectFromPager();
+      } else {
+        connectToPager();
+      }
+    });
+    
+    checkBtn.addEventListener('click', checkForMessages);
+    readBtn.addEventListener('click', markAsRead);
+
+    // Start with connection info - Receiver
+    logEvent('Pager Client Demo initialized. Please connect with your API key.');
+  </script>
+</body>
+</html>
