@@ -2,12 +2,12 @@
 
 So, you wanna do Illumination, heres how get started in 5 Easy Steps™.
 
-1. **Find a lightbulb**, your idea needs to be something *requires* hardware, a backend, and a website. For example: An [ESP32-based pager](/submissions/esp32-pager/esp32-pager.md).
+1. **Find a lightbulb**, your idea needs to be something *requires* hardware, a backend, and a website. For example: An [ESP32-based pager](https://github.com/dropalltables/esp32-pager).
 - [x] uses hardware to display/read messages
 - [x] uses a backend to send messages and recieve read updates
 - [x] uses a website to send messages and view updates on those messages.
 
-2. **Pick your poision**, you need to plan out your project, choose what you want to focus on, either hardware, or software, you are allocated by default $20 for parts, and $10 for cloud credits, $10 are left for advanced projects, if your project is advanced enough, you will get to **choose** between either more parts, or more credits. If you do not need extra parts, do not select extra parts, this can cause your project to be rejected.
+2. **Pick your poision**, you need to plan out your project, choose what you want to focus on, either hardware, or software, you are allocated by default $10 for parts + shipping, and $10 for cloud credits, $10 are left for advanced projects, if your project is advanced enough, you will get to **choose** between either more parts, or more credits. If you do not need extra parts, do not select extra parts, this can cause your project to be rejected.
 
 3. **Get a shovel**, after doing both steps, go look at how to [submit](/docs/SUBMIT.md), and follow the pre-submission steps there.
 
