@@ -33,6 +33,7 @@
   <h1>Pager Demo</h1>
   <h2>THIS WEBSITE LOGS AND STORES IPs, AND SHOWS THEM PUBLICLY</h2>
   <p><strong>!!! PLEASE READ !!!</strong> There is an actual hardware "pager" that I made, since I can't give you guys that (I don't have enough sorry) but I can give you a "simulated" client! This is a reciever, and sender for my pager. The actual WebUI only has a website sender, but this one has a receiver so that you can see what the pager sees.</p>
+  <h3>The API key/password is <code>illumination</code>.</h3>
   <div>
     <button onclick="showTab('sender')">Sender Mode</button>
     <button onclick="showTab('receiver')">Receiver Mode</button>
@@ -106,7 +107,7 @@
       const authToken = document.getElementById('authToken').value;
 
       try {
-        const response = await fetch('https://api.viruus.zip/pager/update', {
+        const response = await fetch('https://api.viruus.zip/esp32/update', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -137,8 +138,8 @@
       const statusElement = document.getElementById('connection-status');
       const messagesList = document.getElementById('messages-list');
       
-      // Update WebSocket URL to use the specific /pager/ws endpoint
-      socket = new WebSocket('wss://api.viruus.zip/pager/ws');
+      // Update WebSocket URL to use the specific /esp32/ws endpoint
+      socket = new WebSocket('wss://api.viruus.zip/esp32/ws');
       
       socket.onopen = () => {
         statusElement.textContent = 'WebSocket Status: Connected';
@@ -289,7 +290,7 @@
       connectionStatus.textContent = 'Connecting...';
       
       try {
-        const response = await fetch('https://api.viruus.zip/pager/messages', {
+        const response = await fetch('https://api.viruus.zip/esp32/messages', {
           method: 'GET',
           headers: {
             'Authorization': apiKey
@@ -359,7 +360,7 @@
       messageStatus.textContent = 'Checking for messages...';
       
       try {
-        const response = await fetch('https://api.viruus.zip/pager/messages', {
+        const response = await fetch('https://api.viruus.zip/esp32/messages', {
           method: 'GET',
           headers: {
             'Authorization': clientState.apiKey
@@ -399,7 +400,7 @@
       messageStatus.textContent = 'Marking message as read...';
       
       try {
-        const response = await fetch('https://api.viruus.zip/pager/read', {
+        const response = await fetch('https://api.viruus.zip/esp32/read', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -424,7 +425,7 @@
 
     // Connect to WebSocket server - Receiver
     function connectReceiverWebSocket() {
-      clientState.socket = new WebSocket('wss://api.viruus.zip/pager/ws');
+      clientState.socket = new WebSocket('wss://api.viruus.zip/esp32/ws');
       
       clientState.socket.onopen = () => {
         logEvent('WebSocket connection established', true);
